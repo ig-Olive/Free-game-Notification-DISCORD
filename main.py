@@ -31,4 +31,4 @@ for hour_data in weather_data["list"]:
 
 if will_rain:
     webhook = SyncWebhook.from_url(WEBHOOK_KEY)
-    webhook.send("Grabbing an umbrella is definitely a smart move to stay dry today.")
+    webhook.send(f"Grabbing an umbrella is definitely a smart move to stay dry today. {hour_data["weather"][0]["description"]}")
