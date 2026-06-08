@@ -6,7 +6,7 @@ import os
 
 OWM_ENDPOINT = "https://api.openweathermap.org/data/2.5/forecast"
 api_key = os.environ.get("OWM_API")
-WEBHOOK_KEY = os.environ.get("WEBHOOK)
+WEBHOOK_KEY = os.environ.get("WEBHOOK")
 
 
 webhook = SyncWebhook.from_url(WEBHOOK_KEY)
