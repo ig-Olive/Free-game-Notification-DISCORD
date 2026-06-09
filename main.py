@@ -28,7 +28,12 @@ will_rain = False
 for hour_data in weather_data["list"]:
     if hour_data["weather"][0]["id"] < 700:
         will_rain = True
-rain = f"6AM{weather_data["list"][0]["weather"][0]["description"]}\n9AM{weather_data["list"][1]["weather"][0]["description"]}\n12AM{weather_data["list"][2]["weather"][0]["description"]}\n3PM{weather_data["list"][3]["weather"][0]["description"]}\n6PM{weather_data["list"][4]["weather"][0]["description"]}\n"
+rain =( f"# 6AM {weather_data["list"][0]["weather"][0]["description"]}\n"
+       f"# 9AM {weather_data["list"][1]["weather"][0]["description"]}\n"
+       f"# 12AM {weather_data["list"][2]["weather"][0]["description"]}\n"
+       f"# 3PM {weather_data["list"][3]["weather"][0]["description"]}\n"
+        f"# 6PM {weather_data["list"][4]["weather"][0]["description"]}\n"
+        )
 
 if will_rain:
     webhook = SyncWebhook.from_url(WEBHOOK_KEY)
