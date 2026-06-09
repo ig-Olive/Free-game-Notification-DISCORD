@@ -37,4 +37,4 @@ rain =( f"# 6AM {weather_data["list"][0]["weather"][0]["description"]}\n"
 
 if will_rain:
     webhook = SyncWebhook.from_url(WEBHOOK_KEY)
-    webhook.send(f"Grabbing an umbrella is definitely a smart move to stay dry today.\n# {rain} ")
+    webhook.send(f"**Grabbing an umbrella is definitely a smart move to stay dry today.\n# {rain} **")
