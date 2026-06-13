@@ -62,7 +62,7 @@ for i in range(len(giveaways_steam)):
 
     embed = Embed(
         title=giveaways_steam[i]["title"],
-        description=f"{giveaways_steam[i]['worth']}\n{giveaways_steam[0]["end_date"].split()[0]}\n{giveaways_steam[0]["open_giveaway_url"]}",
+        description=f"{giveaways_steam[i]['worth']}\n{giveaways_steam[i]["end_date"].split()[0]}\n{giveaways_steam[i]["open_giveaway_url"]}",
     )
     embed.set_image(url=giveaways_steam[i]["image"])
 
@@ -86,7 +86,7 @@ for i in range(len(giveaways_epic)):
 
     embed = Embed(
         title=giveaways_epic[i]["title"],
-        description=f"{giveaways_epic[i]['worth']}\n{giveaways_epic[0]["end_date"].split()[0]}\n{giveaways_epic[0]["open_giveaway_url"]}",
+        description=f"{giveaways_epic[i]['worth']}\n{giveaways_epic[i]["end_date"].split()[0]}\n{giveaways_epic[i]["open_giveaway_url"]}",
     )
     embed.set_image(url=giveaways_epic[i]["image"])
 
