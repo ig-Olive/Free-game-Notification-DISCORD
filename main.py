@@ -1,5 +1,5 @@
 import requests
-from discord import SyncWebhook
+from discord import SyncWebhook,Embed
 import os
 
 
