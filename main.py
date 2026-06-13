@@ -76,7 +76,7 @@ for giveaway in giveaways_steam:
         title=giveaway["title"],
         description=(
             f"💰 {giveaway['worth']}\n"
-            f"📅 Ends: <t:{unix_timestamp}:R>\n"
+            f"📅 Ends <t:{unix_timestamp}:R>\n"
             f"🔗 {giveaway['open_giveaway_url']}"
         )
     )
@@ -118,7 +118,7 @@ for giveaway in giveaways_epic:
         title=giveaway["title"],
         description=(
             f"💰 {giveaway['worth']}\n"
-            f"📅 Ends: <t:{unix_timestamp}:R>\n"
+            f"📅 Ends <t:{unix_timestamp}:R>\n"
             f"🔗 {giveaway['open_giveaway_url']}"
         )
     )
