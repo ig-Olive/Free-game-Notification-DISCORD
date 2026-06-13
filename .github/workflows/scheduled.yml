@@ -43,4 +43,6 @@ jobs:
           # Add more secrets in Settings > Secrets > Actions
           OWM_API: ${{ secrets.OWM_API }}
           WEBHOOK: ${{ secrets.WEBHOOK }}
+          STEAM: ${{secrets.STEAM}}
+          EPICGAMES: ${{secrets.EPICGAMES}}
         run: python main.py
