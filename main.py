@@ -1,6 +1,7 @@
 import requests
 from discord import SyncWebhook,Embed
 import os
+from datetime import datetime
 
 
 
@@ -44,11 +45,11 @@ if will_rain:
     webhook = SyncWebhook.from_url(WEBHOOK_KEY)
     webhook.send(f"**Grabbing an umbrella is definitely a smart move to stay dry today.\n# {rain} **")
 
-####################################### FREE GAME ALERT ####################################################
+###################################################### FREE GAME ALERT ############################################
 
+#                                                          START                                                 #
 
-
-#################################################### Steam Free games loop #######################################
+################################################### Steam Free games loop #######################################
 params = {
     "platform": "steam",
     "type": "game"
@@ -68,11 +69,14 @@ embed_steam = [Embed(
 
 
 for giveaway in giveaways_steam:
+    end_date = giveaway["end_date"]
+    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    unix_timestamp = int(dt.timestamp())
     embed = Embed(
         title=giveaway["title"],
         description=(
             f"💰 {giveaway['worth']}\n"
-            f"📅 Ends: {giveaway['end_date'].split()[0]}\n"
+            f"📅 Ends: <t:{unix_timestamp}:R>\n"
             f"🔗 {giveaway['open_giveaway_url']}"
         )
     )
@@ -107,11 +111,14 @@ embed_epicgames = [Embed(
 
 
 for giveaway in giveaways_epic:
+    end_date = giveaway["end_date"]
+    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    unix_timestamp = int(dt.timestamp())
     embed = Embed(
         title=giveaway["title"],
         description=(
             f"💰 {giveaway['worth']}\n"
-            f"📅 Ends: {giveaway['end_date'].split()[0]}\n"
+            f"📅 Ends: <t:{unix_timestamp}:R>\n"
             f"🔗 {giveaway['open_giveaway_url']}"
         )
     )
