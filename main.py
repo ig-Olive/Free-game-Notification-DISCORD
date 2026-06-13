@@ -8,12 +8,10 @@ OWM_ENDPOINT = "https://api.openweathermap.org/data/2.5/forecast"
 api_key = os.environ.get("OWM_API")
 WEBHOOK_KEY = os.environ.get("WEBHOOK")
 
-### FREE GAME ###
+###################################### FREE GAME ###################################### START
 STEAM = os.environ.get("STEAM")
 EPICGAMES = os.environ.get("EPICGAMES")
-
-
-### FREE GAME ###
+##################################### FREE GAME ####################################### END
 
 
 webhook = SyncWebhook.from_url(WEBHOOK_KEY)
@@ -46,8 +44,11 @@ if will_rain:
     webhook = SyncWebhook.from_url(WEBHOOK_KEY)
     webhook.send(f"**Grabbing an umbrella is definitely a smart move to stay dry today.\n# {rain} **")
 
-### FREE GAME ALERT ###
+####################################### FREE GAME ALERT ####################################################
 
+
+
+#################################################### Steam Free games loop #######################################
 params = {
     "platform": "steam",
     "type": "game"
@@ -56,23 +57,39 @@ params = {
 response_steam = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params)
 giveaways_steam = response_steam.json()
 
-### Steam Free games loop ###
 
-for i in range(len(giveaways_steam)):
+steam_message_id = 1515268058627706952
 
+embed_steam = [Embed(
+    title="🎮 Steam Free Games",
+    description=f"Current Steam giveaways ({len(giveaways_steam)})",
+
+)]
+
+
+for giveaway in giveaways_steam:
     embed = Embed(
-        title=giveaways_steam[i]["title"],
-        description=f"{giveaways_steam[i]['worth']}\n{giveaways_steam[i]["end_date"].split()[0]}\n{giveaways_steam[i]["open_giveaway_url"]}",
+        title=giveaway["title"],
+        description=(
+            f"💰 {giveaway['worth']}\n"
+            f"📅 Ends: {giveaway['end_date'].split()[0]}\n"
+            f"🔗 {giveaway['open_giveaway_url']}"
+        )
     )
-    embed.set_image(url=giveaways_steam[i]["image"])
+    embed.set_image(url=giveaway["image"])
+    embed_steam.append(embed)
+
+requests.patch(
+    f"{STEAM}/messages/{steam_message_id}",
+    json={"embeds": [embed.to_dict() for embed in embed_steam]},
+)
 
 
-    webhook_steam = SyncWebhook.from_url(STEAM)
-    webhook_steam.send(embed=embed)
+
+################################################    EPIC GAMES LOOP #################################################
 
 
-####    EPIC GAMES LOOP #
-
+epic_message_id = 1515273389370249247
 
 params_epic = {
     "platform": "epic-games-store",
@@ -82,17 +99,30 @@ params_epic = {
 response_epic = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params_epic)
 giveaways_epic = response_epic.json()
 
-for i in range(len(giveaways_epic)):
+embed_epicgames = [Embed(
+    title="🎮 EpicGames Free Games",
+    description=f"Current Steam giveaways ({len(giveaways_epic)})",
 
+)]
+
+
+for giveaway in giveaways_epic:
     embed = Embed(
-        title=giveaways_epic[i]["title"],
-        description=f"{giveaways_epic[i]['worth']}\n{giveaways_epic[i]["end_date"].split()[0]}\n{giveaways_epic[i]["open_giveaway_url"]}",
+        title=giveaway["title"],
+        description=(
+            f"💰 {giveaway['worth']}\n"
+            f"📅 Ends: {giveaway['end_date'].split()[0]}\n"
+            f"🔗 {giveaway['open_giveaway_url']}"
+        )
     )
-    embed.set_image(url=giveaways_epic[i]["image"])
+    embed.set_image(url=giveaway["image"])
+    embed_epicgames.append(embed)
 
+requests.patch(
+    f"{EPICGAMES}/messages/{epic_message_id}",
+    json={"embeds": [embed.to_dict() for embed in embed_epicgames]},
+)
 
-    webhook_steam = SyncWebhook.from_url(EPICGAMES)
-    webhook_steam.send(embed=embed)
 
 
 
