@@ -61,9 +61,12 @@ giveaways_steam = response_steam.json()
 
 steam_message_id = 1515268058627706952
 
+dt_now = datetime.strptime(datetime.now(), "%Y-%m-%d %H:%M:%S")
+
 embed_steam = [Embed(
     title="🎮 Steam Free Games",
-    description=f"Current Steam giveaways ({len(giveaways_steam)})",
+    description=f"Current Steam giveaways ({len(giveaways_steam)})\n"
+                f"Last updated: <t:{dt_now}:R> ",
 
 )]
 
