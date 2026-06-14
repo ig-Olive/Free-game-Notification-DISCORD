@@ -64,7 +64,7 @@ steam_message_id = 1515268058627706952
 embed_steam = [Embed(
     title="🎮 Steam Free Games",
     description=f"Current Steam giveaways ({len(giveaways_steam)})\n"
-                f"Last updated: <t:{datetime.now()}:R> ",
+                f"Last updated:  ",
 
 )]
 
