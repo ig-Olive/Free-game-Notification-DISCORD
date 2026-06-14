@@ -58,13 +58,14 @@ params = {
 response_steam = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params)
 giveaways_steam = response_steam.json()
 
+now_unix = int(datetime.timestamp(datetime.now()))
 
 steam_message_id = 1515268058627706952
 
 embed_steam = [Embed(
     title="🎮 Steam Free Games",
     description=f"Current Steam giveaways ({len(giveaways_steam)})\n"
-                f"Last updated:  ",
+                f"Last updated: <t:{now_unix}:R> ",
 
 )]
 
@@ -106,7 +107,8 @@ giveaways_epic = response_epic.json()
 
 embed_epicgames = [Embed(
     title="🎮 EpicGames Free Games",
-    description=f"Current EpicGames giveaways ({len(giveaways_epic)})",
+    description=f"Current EpicGames giveaways ({len(giveaways_epic)})"
+                f"Last updated: <t:{now_unix}:R> ",
 
 )]
 
