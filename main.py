@@ -107,7 +107,7 @@ giveaways_epic = response_epic.json()
 
 embed_epicgames = [Embed(
     title="🎮 EpicGames Free Games",
-    description=f"Current EpicGames giveaways ({len(giveaways_epic)})"
+    description=f"Current EpicGames giveaways ({len(giveaways_epic)})\n"
                 f"Last updated: <t:{now_unix}:R> ",
 
 )]
