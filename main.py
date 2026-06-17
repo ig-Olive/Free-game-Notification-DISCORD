@@ -86,8 +86,8 @@ def send_discord_message(giveaway,url):
     )
     embed.set_image(url=giveaway["image"])
 
-    webhook = SyncWebhook.from_url(url=url)
-    webhook.send(embed=embed)
+    webhook_send = SyncWebhook.from_url(url=url)
+    webhook_send.send(embed=embed)
 
 def game_data_delete(row_id,platform):
     response = requests.delete(
