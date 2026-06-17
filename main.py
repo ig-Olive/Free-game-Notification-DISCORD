@@ -52,6 +52,56 @@ if will_rain:
 #                                                          START                                                 #
 
 ################################################### Steam Free games loop #######################################
+def get_stored_game_ids(platform):
+    response = requests.get(url=f"{SHEETY_URL}/{platform}",headers={"Authorization":f"Bearer {SHEETY_TOKEN}"})
+    response.raise_for_status()
+
+    datas = response.json()[platform]
+    return [(row["gameId"]) for row in datas]
+
+
+def save_game_id(game_id,platform):
+    payload = {
+        platform[:-1]:{
+            "gameId": game_id,
+        }
+    }
+
+    response = requests.post(url=f"{SHEETY_URL}/{platform}", json=payload,headers={"Authorization":f"Bearer {SHEETY_TOKEN}"})
+    response.raise_for_status()
+
+
+def send_discord_message(giveaway,url):
+    end_date = giveaway["end_date"]
+    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    unix_timestamp = int(dt.timestamp())
+
+    embed = Embed(
+        title=giveaway["title"],
+        description=(
+            f"💰 {giveaway['worth']}\n"
+            f"📅 Ends <t:{unix_timestamp}:R>\n"
+            f"🔗 {giveaway['open_giveaway_url']}"
+        )
+    )
+    embed.set_image(url=giveaway["image"])
+
+    webhook = SyncWebhook.from_url(url=url)
+    webhook.send(embed=embed)
+
+def game_data_delete(row_id,platform):
+    response = requests.delete(
+        f"{SHEETY_URL}/{platform}/{row_id}",
+        headers={
+            "Authorization": f"Bearer {SHEETY_TOKEN}"
+        }
+    )
+    response.raise_for_status()
+
+
+
+#################################################### Steam Free games loop #################################
+
 params = {
     "platform": "steam",
     "type": "game"
