@@ -45,4 +45,6 @@ jobs:
           WEBHOOK: ${{ secrets.WEBHOOK }}
           STEAM: ${{secrets.STEAM}}
           EPICGAMES: ${{secrets.EPICGAMES}}
+          SHEETY_TOKEN: ${{secrets.SHEETY_TOKEN}}
+          SHEETY_URL: ${{secrets.SHEETY_URL}}
         run: python main.py
