@@ -8,6 +8,8 @@ from datetime import datetime
 OWM_ENDPOINT = "https://api.openweathermap.org/data/2.5/forecast"
 api_key = os.environ.get("OWM_API")
 WEBHOOK_KEY = os.environ.get("WEBHOOK")
+SHEETY_TOKEN = os.environ.get("SHEETY_TOKEN")
+SHEETY_URL = os.environ.get("SHEETY_URL")
 
 ###################################### FREE GAME ###################################### START
 STEAM = os.environ.get("STEAM")
@@ -58,44 +60,47 @@ params = {
 response_steam = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params)
 giveaways_steam = response_steam.json()
 
-now_unix = int(datetime.timestamp(datetime.now()))
-
-steam_message_id = 1515268058627706952
-
-embed_steam = [Embed(
-    title="🎮 Steam Free Games",
-    description=f"Current Steam giveaways ({len(giveaways_steam)})\n"
-                f"Last updated: <t:{now_unix}:R> ",
-
-)]
-
-
-for giveaway in giveaways_steam:
-    end_date = giveaway["end_date"]
-    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-    unix_timestamp = int(dt.timestamp())
-    embed = Embed(
-        title=giveaway["title"],
-        description=(
-            f"💰 {giveaway['worth']}\n"
-            f"📅 Ends <t:{unix_timestamp}:R>\n"
-            f"🔗 {giveaway['open_giveaway_url']}"
-        )
-    )
-    embed.set_image(url=giveaway["image"])
-    embed_steam.append(embed)
-
-requests.patch(
-    f"{STEAM}/messages/{steam_message_id}",
-    json={"embeds": [embed.to_dict() for embed in embed_steam]},
-)
 
 
 
-################################################    EPIC GAMES LOOP #################################################
+free_game_ids_steam = [giveaway["id"] for giveaway in giveaways_steam]
+
+stored_game_ids_steam = get_stored_game_ids(platform="steamdatas")
 
 
-epic_message_id = 1515273389370249247
+def update_data(free_games, stored_games):
+    index = -1
+    for game_id in stored_games:
+        index += 1
+        if game_id not in free_games:
+            game_data_delete(index+2,platform="steamdatas")
+            index -= 1
+
+def send_to_discord_steam():
+    index = -1
+    for game_id in free_game_ids_steam:
+        index += 1
+        if game_id not in stored_game_ids_steam:
+            send_discord_message(giveaways_steam[index],STEAM)
+
+
+def store_new_games(free_games,stored_games,platform):
+    for game_id in free_games:
+        if game_id not in stored_games:
+            save_game_id(game_id,platform)
+
+
+
+
+update_data(free_games=free_game_ids_steam, stored_games=stored_game_ids_steam)
+send_to_discord_steam()
+store_new_games(free_games=free_game_ids_steam,stored_games=stored_game_ids_steam,platform="steamdatas")
+
+
+
+
+
+# ################################################    EPIC GAMES LOOP #################################################
 
 params_epic = {
     "platform": "epic-games-store",
@@ -105,33 +110,39 @@ params_epic = {
 response_epic = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params_epic)
 giveaways_epic = response_epic.json()
 
-embed_epicgames = [Embed(
-    title="🎮 EpicGames Free Games",
-    description=f"Current EpicGames giveaways ({len(giveaways_epic)})\n"
-                f"Last updated: <t:{now_unix}:R> ",
+free_game_ids_epic = [giveaway["id"] for giveaway in giveaways_epic]
 
-)]
+stored_game_ids_epic = get_stored_game_ids(platform="epicdatas")
 
 
-for giveaway in giveaways_epic:
-    end_date = giveaway["end_date"]
-    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-    unix_timestamp = int(dt.timestamp())
-    embed = Embed(
-        title=giveaway["title"],
-        description=(
-            f"💰 {giveaway['worth']}\n"
-            f"📅 Ends <t:{unix_timestamp}:R>\n"
-            f"🔗 {giveaway['open_giveaway_url']}"
-        )
-    )
-    embed.set_image(url=giveaway["image"])
-    embed_epicgames.append(embed)
+def update_data(free_games, stored_games):
+    index = -1
+    for game_id in stored_games:
+        index += 1
+        if game_id not in free_games:
+            game_data_delete(index+2,platform="epicdatas")
+            index -= 1
 
-requests.patch(
-    f"{EPICGAMES}/messages/{epic_message_id}",
-    json={"embeds": [embed.to_dict() for embed in embed_epicgames]},
-)
+def send_to_discord_epic():
+    index = -1
+    for game_id in free_game_ids_epic:
+        index += 1
+        if game_id not in stored_game_ids_epic:
+            send_discord_message(giveaways_epic[index],EPICGAMES)
+
+
+def store_new_games(free_games,stored_games,platform):
+    for game_id in free_games:
+        if game_id not in stored_games:
+            save_game_id(game_id,platform)
+
+
+
+
+update_data(free_games=free_game_ids_epic, stored_games=stored_game_ids_epic)
+send_to_discord_epic()
+store_new_games(free_games=free_game_ids_epic,stored_games=stored_game_ids_epic,platform="epicdatas")
+
 
 
 
