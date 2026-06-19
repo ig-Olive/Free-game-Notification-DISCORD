@@ -42,14 +42,19 @@ def game_data_delete(row_id, ws):
 # ── Discord ────────────────────────────────────────────────────────────────────
 
 def send_discord_message(giveaway, url):
-    dt = datetime.strptime(giveaway["end_date"], "%Y-%m-%d %H:%M:%S")
-    unix_timestamp = int(dt.timestamp())
+    end_date = giveaway["end_date"]
+
+    if end_date and end_date != "N/A":
+        dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+        end_str = f"<t:{int(dt.timestamp())}:R>"
+    else:
+        end_str = "No expiry date"
 
     embed = Embed(
         title=giveaway["title"],
         description=(
             f"💰 {giveaway['worth']}\n"
-            f"📅 Ends <t:{unix_timestamp}:R>\n"
+            f"📅 Ends {end_str}\n"
             f"🔗 {giveaway['open_giveaway_url']}"
         )
     )
@@ -111,7 +116,7 @@ store_new_games(free_ids_epic, stored_ids_epic, epic_ws)
 
 giveaways_all = requests.get(
     "https://www.gamerpower.com/api/giveaways",
-    params={"type": "game"}
+    params={"platform": "pc", "type": "game"}
 ).json()
 
 # Exclude Steam & Epic since they're already handled
