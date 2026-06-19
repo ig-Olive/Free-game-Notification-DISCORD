@@ -45,4 +45,5 @@ jobs:
           EPICGAMES: ${{secrets.EPICGAMES}}
           GOOGLE_CREDENTIALS : ${{secrets.GOOGLE_CREDENTIALS }}
           SHEET_URL: ${{secrets.SHEET_URL}}
+          ALLGAMES: ${{secrets.ALLGAMES}}
         run: python main.py
