@@ -1,2 +1,4 @@
-discord.py
 requests
+discord.py
+gspread
+google-auth
