@@ -1,45 +1,46 @@
 import requests
-from discord import SyncWebhook,Embed
+from discord import SyncWebhook, Embed
 import os
+import json
 from datetime import datetime
+import gspread
+from google.oauth2.service_account import Credentials
 
-
-SHEETY_TOKEN = os.environ.get("SHEETY_TOKEN")
-SHEETY_URL = os.environ.get("SHEETY_URL")
-
-###################################### FREE GAME ###################################### START
-STEAM = os.environ.get("STEAM")
+STEAM    = os.environ.get("STEAM")
 EPICGAMES = os.environ.get("EPICGAMES")
-##################################### FREE GAME ####################################### END
 
+# ── Auth ───────────────────────────────────────────────────────────────────────
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
 
-###################################################### FREE GAME ALERT ############################################
+creds = Credentials.from_service_account_info(
+    json.loads(os.environ["GOOGLE_CREDENTIALS"]),
+    scopes=SCOPES
+)
+client = gspread.authorize(creds)
 
-#                                                          START                                                 #
+sheet    = client.open_by_url(os.environ["SHEET_URL"])
+steam_ws = sheet.worksheet("steamdatas")
+epic_ws  = sheet.worksheet("epicdatas")
 
-################################################### Steam Free games loop #######################################
-def get_stored_game_ids(platform):
-    response = requests.get(url=f"{SHEETY_URL}/{platform}",headers={"Authorization":f"Bearer {SHEETY_TOKEN}"})
-    response.raise_for_status()
+# ── Sheet helpers (replaces Sheety) ───────────────────────────────────────────
 
-    datas = response.json()[platform]
-    return [(row["gameId"]) for row in datas]
+def get_stored_game_ids(ws):
+    values = ws.col_values(1)      # all values in column A
+    return [int(v) for v in values[1:] if v]   # skip header, cast to int
 
+def save_game_id(game_id, ws):
+    ws.append_row([game_id])
 
-def save_game_id(game_id,platform):
-    payload = {
-        platform[:-1]:{
-            "gameId": game_id,
-        }
-    }
+def game_data_delete(row_id, ws):
+    ws.delete_rows(row_id)         # row_id is 1-indexed (row 1 = header)
 
-    response = requests.post(url=f"{SHEETY_URL}/{platform}", json=payload,headers={"Authorization":f"Bearer {SHEETY_TOKEN}"})
-    response.raise_for_status()
+# ── Discord ────────────────────────────────────────────────────────────────────
 
-
-def send_discord_message(giveaway,url):
-    end_date = giveaway["end_date"]
-    dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+def send_discord_message(giveaway, url):
+    dt = datetime.strptime(giveaway["end_date"], "%Y-%m-%d %H:%M:%S")
     unix_timestamp = int(dt.timestamp())
 
     embed = Embed(
@@ -51,123 +52,55 @@ def send_discord_message(giveaway,url):
         )
     )
     embed.set_image(url=giveaway["image"])
+    SyncWebhook.from_url(url=url).send(embed=embed)
 
-    webhook_send = SyncWebhook.from_url(url=url)
-    webhook_send.send(embed=embed)
+# ── Shared logic ───────────────────────────────────────────────────────────────
 
-def game_data_delete(row_id,platform):
-    response = requests.delete(
-        f"{SHEETY_URL}/{platform}/{row_id}",
-        headers={
-            "Authorization": f"Bearer {SHEETY_TOKEN}"
-        }
-    )
-    response.raise_for_status()
-
-
-
-#################################################### Steam Free games loop #################################
-
-params = {
-    "platform": "steam",
-    "type": "game"
-}
-
-response_steam = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params)
-giveaways_steam = response_steam.json()
-
-
-
-
-free_game_ids_steam = [giveaway["id"] for giveaway in giveaways_steam]
-
-stored_game_ids_steam = get_stored_game_ids(platform="steamdatas")
-
-
-def update_data(free_games, stored_games):
+def update_data(free_games, stored_games, ws):
+    """Remove game IDs from the sheet that are no longer free."""
     index = -1
     for game_id in stored_games:
         index += 1
         if game_id not in free_games:
-            game_data_delete(index+2,platform="steamdatas")
-            index -= 1
+            game_data_delete(index + 2, ws)  # +2: skip header + 1-indexed
+            index -= 1                        # row shifted up after delete
 
-def send_to_discord_steam():
-    index = -1
-    for game_id in free_game_ids_steam:
-        index += 1
-        if game_id not in stored_game_ids_steam:
-            send_discord_message(giveaways_steam[index],STEAM)
+def send_new_to_discord(giveaways, free_ids, stored_ids, webhook_url):
+    """Send Discord alert only for games not already stored."""
+    for i, game_id in enumerate(free_ids):
+        if game_id not in stored_ids:
+            send_discord_message(giveaways[i], webhook_url)
 
-
-def store_new_games(free_games,stored_games,platform):
+def store_new_games(free_games, stored_games, ws):
+    """Append game IDs that aren't already in the sheet."""
     for game_id in free_games:
         if game_id not in stored_games:
-            save_game_id(game_id,platform)
+            save_game_id(game_id, ws)
 
+# ── Steam ──────────────────────────────────────────────────────────────────────
 
+giveaways_steam     = requests.get(
+    "https://www.gamerpower.com/api/giveaways",
+    params={"platform": "steam", "type": "game"}
+).json()
 
+free_ids_steam      = [g["id"] for g in giveaways_steam]
+stored_ids_steam    = get_stored_game_ids(steam_ws)
 
-update_data(free_games=free_game_ids_steam, stored_games=stored_game_ids_steam)
-send_to_discord_steam()
-store_new_games(free_games=free_game_ids_steam,stored_games=stored_game_ids_steam,platform="steamdatas")
+update_data(free_ids_steam, stored_ids_steam, steam_ws)
+send_new_to_discord(giveaways_steam, free_ids_steam, stored_ids_steam, STEAM)
+store_new_games(free_ids_steam, stored_ids_steam, steam_ws)
 
+# ── Epic Games ─────────────────────────────────────────────────────────────────
 
+giveaways_epic      = requests.get(
+    "https://www.gamerpower.com/api/giveaways",
+    params={"platform": "epic-games-store", "type": "game"}
+).json()
 
+free_ids_epic       = [g["id"] for g in giveaways_epic]
+stored_ids_epic     = get_stored_game_ids(epic_ws)
 
-
-# ################################################    EPIC GAMES LOOP #################################################
-
-params_epic = {
-    "platform": "epic-games-store",
-    "type": "game"
-}
-
-response_epic = requests.get(url="https://www.gamerpower.com/api/giveaways", params=params_epic)
-giveaways_epic = response_epic.json()
-
-free_game_ids_epic = [giveaway["id"] for giveaway in giveaways_epic]
-
-stored_game_ids_epic = get_stored_game_ids(platform="epicdatas")
-
-
-def update_data(free_games, stored_games):
-    index = -1
-    for game_id in stored_games:
-        index += 1
-        if game_id not in free_games:
-            game_data_delete(index+2,platform="epicdatas")
-            index -= 1
-
-def send_to_discord_epic():
-    index = -1
-    for game_id in free_game_ids_epic:
-        index += 1
-        if game_id not in stored_game_ids_epic:
-            send_discord_message(giveaways_epic[index],EPICGAMES)
-
-
-def store_new_games(free_games,stored_games,platform):
-    for game_id in free_games:
-        if game_id not in stored_games:
-            save_game_id(game_id,platform)
-
-
-
-
-update_data(free_games=free_game_ids_epic, stored_games=stored_game_ids_epic)
-send_to_discord_epic()
-store_new_games(free_games=free_game_ids_epic,stored_games=stored_game_ids_epic,platform="epicdatas")
-
-
-
-
-
-
-
-
-
-
-
-
-
+update_data(free_ids_epic, stored_ids_epic, epic_ws)
+send_new_to_discord(giveaways_epic, free_ids_epic, stored_ids_epic, EPICGAMES)
+store_new_games(free_ids_epic, stored_ids_epic, epic_ws)
