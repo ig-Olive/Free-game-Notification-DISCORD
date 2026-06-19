@@ -41,10 +41,8 @@ jobs:
         env:
           # Your secrets are available as environment variables
           # Add more secrets in Settings > Secrets > Actions
-          OWM_API: ${{ secrets.OWM_API }}
-          WEBHOOK: ${{ secrets.WEBHOOK }}
           STEAM: ${{secrets.STEAM}}
           EPICGAMES: ${{secrets.EPICGAMES}}
-          SHEETY_TOKEN: ${{secrets.SHEETY_TOKEN}}
+          GOOGLE_CREDENTIALS : ${{secrets.GOOGLE_CREDENTIALS }}
           SHEETY_URL: ${{secrets.SHEETY_URL}}
         run: python main.py
