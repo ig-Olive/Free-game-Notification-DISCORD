@@ -8,6 +8,7 @@ from google.oauth2.service_account import Credentials
 
 STEAM    = os.environ.get("STEAM")
 EPICGAMES = os.environ.get("EPICGAMES")
+ALLGAMES = os.environ.get("ALLGAMES")
 
 # ── Auth ───────────────────────────────────────────────────────────────────────
 SCOPES = [
@@ -24,6 +25,7 @@ client = gspread.authorize(creds)
 sheet    = client.open_by_url(os.environ["SHEET_URL"])
 steam_ws = sheet.worksheet("steamdatas")
 epic_ws  = sheet.worksheet("epicdatas")
+allgames_ws = sheet.worksheet("allgames")
 
 # ── Sheet helpers (replaces Sheety) ───────────────────────────────────────────
 
@@ -104,3 +106,21 @@ stored_ids_epic     = get_stored_game_ids(epic_ws)
 update_data(free_ids_epic, stored_ids_epic, epic_ws)
 send_new_to_discord(giveaways_epic, free_ids_epic, stored_ids_epic, EPICGAMES)
 store_new_games(free_ids_epic, stored_ids_epic, epic_ws)
+
+# ── All Games (excluding Steam & Epic) ────────────────────────────────────────
+
+giveaways_all = requests.get(
+    "https://www.gamerpower.com/api/giveaways",
+    params={"type": "game"}
+).json()
+
+# Exclude Steam & Epic since they're already handled
+excluded_ids = set(free_ids_steam + free_ids_epic)
+giveaways_allgames = [g for g in giveaways_all if g["id"] not in excluded_ids]
+
+free_ids_allgames   = [g["id"] for g in giveaways_allgames]
+stored_ids_allgames = get_stored_game_ids(allgames_ws)
+
+update_data(free_ids_allgames, stored_ids_allgames, allgames_ws)
+send_new_to_discord(giveaways_allgames, free_ids_allgames, stored_ids_allgames, ALLGAMES)
+store_new_games(free_ids_allgames, stored_ids_allgames, allgames_ws)
