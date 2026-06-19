@@ -44,5 +44,5 @@ jobs:
           STEAM: ${{secrets.STEAM}}
           EPICGAMES: ${{secrets.EPICGAMES}}
           GOOGLE_CREDENTIALS : ${{secrets.GOOGLE_CREDENTIALS }}
-          SHEETY_URL: ${{secrets.SHEETY_URL}}
+          SHEET_URL: ${{secrets.SHEET_URL}}
         run: python main.py
