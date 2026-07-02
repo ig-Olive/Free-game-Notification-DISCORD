@@ -85,47 +85,54 @@ def store_new_games(free_games, stored_games, ws):
             save_game_id(game_id, ws)
 
 # ── Steam ──────────────────────────────────────────────────────────────────────
-
-giveaways_steam     = requests.get(
-    "https://www.gamerpower.com/api/giveaways",
-    params={"platform": "steam", "type": "game"}
-).json()
-
-free_ids_steam      = [g["id"] for g in giveaways_steam]
-stored_ids_steam    = get_stored_game_ids(steam_ws)
-
-update_data(free_ids_steam, stored_ids_steam, steam_ws)
-send_new_to_discord(giveaways_steam, free_ids_steam, stored_ids_steam, STEAM)
-store_new_games(free_ids_steam, stored_ids_steam, steam_ws)
+try:
+    giveaways_steam     = requests.get(
+        "https://www.gamerpower.com/api/giveaways",
+        params={"platform": "steam", "type": "game"}
+    ).json()
+    
+    free_ids_steam      = [g["id"] for g in giveaways_steam]
+    stored_ids_steam    = get_stored_game_ids(steam_ws)
+    
+    update_data(free_ids_steam, stored_ids_steam, steam_ws)
+    send_new_to_discord(giveaways_steam, free_ids_steam, stored_ids_steam, STEAM)
+    store_new_games(free_ids_steam, stored_ids_steam, steam_ws)
+except:
+    pass
 
 # ── Epic Games ─────────────────────────────────────────────────────────────────
+try:
 
-giveaways_epic      = requests.get(
-    "https://www.gamerpower.com/api/giveaways",
-    params={"platform": "epic-games-store", "type": "game"}
-).json()
-
-free_ids_epic       = [g["id"] for g in giveaways_epic]
-stored_ids_epic     = get_stored_game_ids(epic_ws)
-
-update_data(free_ids_epic, stored_ids_epic, epic_ws)
-send_new_to_discord(giveaways_epic, free_ids_epic, stored_ids_epic, EPICGAMES)
-store_new_games(free_ids_epic, stored_ids_epic, epic_ws)
+    giveaways_epic      = requests.get(
+        "https://www.gamerpower.com/api/giveaways",
+        params={"platform": "epic-games-store", "type": "game"}
+    ).json()
+    
+    free_ids_epic       = [g["id"] for g in giveaways_epic]
+    stored_ids_epic     = get_stored_game_ids(epic_ws)
+    
+    update_data(free_ids_epic, stored_ids_epic, epic_ws)
+    send_new_to_discord(giveaways_epic, free_ids_epic, stored_ids_epic, EPICGAMES)
+    store_new_games(free_ids_epic, stored_ids_epic, epic_ws)
+except:
+    pass
 
 # ── All Games (excluding Steam & Epic) ────────────────────────────────────────
-
-giveaways_all = requests.get(
-    "https://www.gamerpower.com/api/giveaways",
-    params={"platform": "pc", "type": "game"}
-).json()
-
-# Exclude Steam & Epic since they're already handled
-excluded_ids = set(free_ids_steam + free_ids_epic)
-giveaways_allgames = [g for g in giveaways_all if g["id"] not in excluded_ids]
-
-free_ids_allgames   = [g["id"] for g in giveaways_allgames]
-stored_ids_allgames = get_stored_game_ids(allgames_ws)
-
-update_data(free_ids_allgames, stored_ids_allgames, allgames_ws)
-send_new_to_discord(giveaways_allgames, free_ids_allgames, stored_ids_allgames, ALLGAMES)
-store_new_games(free_ids_allgames, stored_ids_allgames, allgames_ws)
+try:
+    giveaways_all = requests.get(
+        "https://www.gamerpower.com/api/giveaways",
+        params={"platform": "pc", "type": "game"}
+    ).json()
+    
+    # Exclude Steam & Epic since they're already handled
+    excluded_ids = set(free_ids_steam + free_ids_epic)
+    giveaways_allgames = [g for g in giveaways_all if g["id"] not in excluded_ids]
+    
+    free_ids_allgames   = [g["id"] for g in giveaways_allgames]
+    stored_ids_allgames = get_stored_game_ids(allgames_ws)
+    
+    update_data(free_ids_allgames, stored_ids_allgames, allgames_ws)
+    send_new_to_discord(giveaways_allgames, free_ids_allgames, stored_ids_allgames, ALLGAMES)
+    store_new_games(free_ids_allgames, stored_ids_allgames, allgames_ws)
+except:
+    pass
